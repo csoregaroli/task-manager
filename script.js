@@ -4,7 +4,7 @@ const addItemContainers = document.querySelectorAll('.add-container')
 const addItems = document.querySelectorAll('.add-item')
 
 // Item Lists
-const listsColumns = document.querySelectorAll('.drag-item-list')
+const listColumns = document.querySelectorAll('.drag-item-list')
 const backlogList = document.getElementById('backlog-list')
 const progressList = document.getElementById('progress-list')
 const completeList = document.getElementById('complete-list')
@@ -48,6 +48,12 @@ const updateSavedColumns = () => {
     })
 }
 
+// Filter Array to remove empty values
+function filterArray(array) {
+    const filteredArray = array.filter(item => item !== null)
+    return filteredArray
+  }
+
 // Create DOM Elements for each list item
 const createItemEl = (columnEl, column, item, index) => {
     const listEl = document.createElement('li')
@@ -55,6 +61,9 @@ const createItemEl = (columnEl, column, item, index) => {
     listEl.textContent = item
     listEl.draggable = true
     listEl.setAttribute('ondragstart', 'drag(event)')
+    listEl.contentEditable = true
+    listEl.id = index
+    listEl.setAttribute('onfocusout', `updateItem(${index}, ${column})`)
     // Append
     columnEl.appendChild(listEl)
 }
@@ -68,24 +77,39 @@ const updateDOM = () => {
     backlogListArray.forEach((backlogItem, index) => {
         createItemEl(backlogList, 0, backlogItem, index)
     })
+    backlogListArray = filterArray(backlogListArray)
 
     progressList.textContent = ''
     progressListArray.forEach((progressItem, index) => {
-        createItemEl(progressList, 0, progressItem, index)
+        createItemEl(progressList, 1, progressItem, index)
     })
+    progressListArray = filterArray(progressListArray)
 
     completeList.textContent = ''
     completeListArray.forEach((completeItem, index) => {
-        createItemEl(completeList, 0, completeItem, index)
+        createItemEl(completeList, 2, completeItem, index)
     })
+    completeListArray = filterArray(completeListArray)
 
     onHoldList.textContent = ''
     onHoldListArray.forEach((onHoldItem, index) => {
-        createItemEl(onHoldList, 0, onHoldItem, index)
+        createItemEl(onHoldList, 3, onHoldItem, index)
     })
+    onHoldListArray = filterArray(onHoldListArray)
 
     updatedOnLoad = true
     updateSavedColumns()
+}
+
+// Update Item - Delete if necessary, or update Array value
+const updateItem = (id, column) => {
+    const selectedArray = listArrays[column]
+    const selectedColumnEl = listColumns[column].children
+    if (!selectedColumnEl[id].textContent) {
+        delete selectedArray[id]
+    }
+    console.log(selectedArray)
+    updateDOM()
 }
 
 // Add to Column List
